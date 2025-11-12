@@ -34,7 +34,29 @@ def boolean(img: Image.Image, value: int, op: str) -> Image.Image:
 
 def geom_translate(img: Image.Image, dx: int, dy: int) -> Image.Image:
     arr = np.array(img)
-    result = np.roll(arr, shift=(dy, dx), axis=(0, 1))
+    h, w = arr.shape[:2]
+    
+    # Buat canvas kosong (hitam)
+    result = np.zeros_like(arr)
+    
+    # Hitung koordinat sumber dan tujuan
+    # Untuk dx positif: geser ke kanan
+    # Untuk dy positif: geser ke bawah
+    
+    src_x_start = max(0, -dx)
+    src_x_end = min(w, w - dx)
+    src_y_start = max(0, -dy)
+    src_y_end = min(h, h - dy)
+    
+    dst_x_start = max(0, dx)
+    dst_x_end = dst_x_start + (src_x_end - src_x_start)
+    dst_y_start = max(0, dy)
+    dst_y_end = dst_y_start + (src_y_end - src_y_start)
+    
+    # Copy pixel yang masih dalam batas
+    result[dst_y_start:dst_y_end, dst_x_start:dst_x_end] = \
+        arr[src_y_start:src_y_end, src_x_start:src_x_end]
+    
     return Image.fromarray(result)
 
 def geom_rotate(img: Image.Image, angle: float) -> Image.Image:
@@ -42,7 +64,13 @@ def geom_rotate(img: Image.Image, angle: float) -> Image.Image:
 
 def geom_zoom(img: Image.Image, scale: float) -> Image.Image:
     w, h = img.size
-    return img.resize((int(w*scale), int(h*scale)), Image.Resampling.LANCZOS)
+    new_w = int(w * scale)
+    new_h = int(h * scale)
+    
+    new_w = max(1, new_w)
+    new_h = max(1, new_h)
+    
+    return img.resize((new_w, new_h), Image.Resampling.LANCZOS)
 
 def geom_flip(img: Image.Image, mode: str) -> Image.Image:
     if mode == 'horizontal':

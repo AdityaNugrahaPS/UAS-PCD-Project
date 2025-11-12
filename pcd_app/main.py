@@ -7,6 +7,7 @@ from modules import basic_ops, about
 class ImageProcessingApp:
     def edge_detection(self, method):
         if self.processed_image:
+            self.push_undo()  # FIX: Tambah undo
             from modules import edge_detection
             func = getattr(edge_detection, method, None)
             if func:
@@ -17,64 +18,86 @@ class ImageProcessingApp:
                 messagebox.showerror("Error", f"Metode edge detection '{method}' tidak ditemukan.")
         else:
             messagebox.showwarning("Warning", "Silakan buka gambar terlebih dahulu.")
+    
     def show_about(self):
         from modules import about
-        messagebox.showinfo("Tentang Kelompok", about.get_about_text())
+        messagebox.showinfo("Tentang Kelompok", about.get_team_info())
+    
     def segmentation_watershed(self):
         if self.processed_image:
+            self.push_undo()  # FIX: Tambah undo
             from modules import segmentation
             result = segmentation.watershed(self.processed_image)
             self.processed_image = result
             self.display_image(result)
         else:
             messagebox.showwarning("Warning", "Silakan buka gambar terlebih dahulu.")
+    
     def segmentation_region_growing(self):
         if self.processed_image:
+            self.push_undo()  # FIX: Tambah undo
             from modules import segmentation
             result = segmentation.region_growing(self.processed_image)
             self.processed_image = result
             self.display_image(result)
         else:
             messagebox.showwarning("Warning", "Silakan buka gambar terlebih dahulu.")
+    
     def segmentation_thresholding(self):
         if self.processed_image:
+            self.push_undo()  # FIX: Tambah undo
             from modules import segmentation
             result = segmentation.thresholding(self.processed_image)
             self.processed_image = result
             self.display_image(result)
         else:
             messagebox.showwarning("Warning", "Silakan buka gambar terlebih dahulu.")
+    
     def enhance_contrast(self):
         if self.processed_image:
             from modules import enhancement
             factor = self.ask_slider_float("Contrast", "Faktor kontras", 0.1, 3.0, 1.2)
             if factor is not None:
+                self.push_undo()  # FIX: Tambah undo
                 result = enhancement.contrast(self.processed_image, factor)
                 self.processed_image = result
                 self.display_image(result)
         else:
             messagebox.showwarning("Warning", "Silakan buka gambar terlebih dahulu.")
+    
     def enhance_brightness(self):
         if self.processed_image:
             from modules import enhancement
             factor = self.ask_slider_float("Brightness", "Faktor kecerahan", 0.1, 3.0, 1.2)
             if factor is not None:
+                self.push_undo()  # FIX: Tambah undo
                 result = enhancement.brightness(self.processed_image, factor)
                 self.processed_image = result
                 self.display_image(result)
         else:
             messagebox.showwarning("Warning", "Silakan buka gambar terlebih dahulu.")
+    
     def __init__(self, root):
         self.root = root
         self.root.title("Aplikasi Pengolahan Citra Digital")
-        self.root.geometry("800x600")
+
+        # Dapatkan resolusi layar
+        screen_w = root.winfo_screenwidth()
+        screen_h = root.winfo_screenheight()
+
+        # Set ukuran jendela sesuai resolusi layar
+        self.root.geometry(f"{screen_w}x{screen_h}")
+
+        # Maksimalkan jendela
+        self.root.state('zoomed')  # Windows
+
         self.image = None
         self.image_path = None
         self.processed_image = None
         self.undo_stack = []
         self.redo_stack = []
         self.create_menu()
-        self.create_toolbar()  # Tambahkan toolbar
+        self.create_toolbar()
         self.create_canvas()
 
     def create_toolbar(self):
@@ -103,11 +126,7 @@ class ImageProcessingApp:
             redo_btn.config(text='Redo')
         redo_btn.pack(side=tk.LEFT, padx=2, pady=2)
 
-
-
         toolbar.pack(side=tk.TOP, anchor='w', padx=2, pady=2)
-
-
 
     def create_menu(self):
         menubar = tk.Menu(self.root)
@@ -215,6 +234,7 @@ class ImageProcessingApp:
         about_menu.add_command(label="Kelompok", command=self.show_about)
         menubar.add_cascade(label="About", menu=about_menu)
         self.root.config(menu=menubar)
+    
     def push_undo(self):
         if self.processed_image:
             self.undo_stack.append(self.processed_image.copy())
@@ -241,6 +261,7 @@ class ImageProcessingApp:
 
     def enhance_histogram(self):
         if self.processed_image:
+            self.push_undo()  # FIX: Tambah undo
             from modules import enhancement
             result = enhancement.histogram_equalization(self.processed_image)
             self.processed_image = result
@@ -250,6 +271,7 @@ class ImageProcessingApp:
 
     def smoothing_spatial(self):
         if self.processed_image:
+            self.push_undo()  # FIX: Tambah undo
             from modules import enhancement
             result = enhancement.smoothing_spatial(self.processed_image)
             self.processed_image = result
@@ -259,6 +281,7 @@ class ImageProcessingApp:
 
     def smoothing_frequency(self):
         if self.processed_image:
+            self.push_undo()  # FIX: Tambah undo
             from modules import enhancement
             result = enhancement.smoothing_frequency(self.processed_image)
             self.processed_image = result
@@ -268,6 +291,7 @@ class ImageProcessingApp:
 
     def sharpening_spatial(self):
         if self.processed_image:
+            self.push_undo()  # FIX: Tambah undo
             from modules import enhancement
             result = enhancement.sharpening_spatial(self.processed_image)
             self.processed_image = result
@@ -277,6 +301,7 @@ class ImageProcessingApp:
 
     def sharpening_frequency(self):
         if self.processed_image:
+            self.push_undo()  # FIX: Tambah undo
             from modules import enhancement
             result = enhancement.sharpening_frequency(self.processed_image)
             self.processed_image = result
@@ -286,14 +311,17 @@ class ImageProcessingApp:
 
     def geometric_correction(self):
         if self.processed_image:
+            self.push_undo()  # FIX: Tambah undo
             from modules import enhancement
             result = enhancement.geometric_correction(self.processed_image)
             self.processed_image = result
             self.display_image(result)
         else:
             messagebox.showwarning("Warning", "Silakan buka gambar terlebih dahulu.")
+    
     def noise_gaussian(self):
         if self.processed_image:
+            self.push_undo()  # FIX: Tambah undo
             from modules import noise
             result = noise.gaussian(self.processed_image)
             self.processed_image = result
@@ -303,6 +331,7 @@ class ImageProcessingApp:
 
     def noise_rayleigh(self):
         if self.processed_image:
+            self.push_undo()  # FIX: Tambah undo
             from modules import noise
             result = noise.rayleigh(self.processed_image)
             self.processed_image = result
@@ -312,6 +341,7 @@ class ImageProcessingApp:
 
     def noise_erlang(self):
         if self.processed_image:
+            self.push_undo()  # FIX: Tambah undo
             from modules import noise
             result = noise.erlang(self.processed_image)
             self.processed_image = result
@@ -321,6 +351,7 @@ class ImageProcessingApp:
 
     def noise_exponential(self):
         if self.processed_image:
+            self.push_undo()  # FIX: Tambah undo
             from modules import noise
             result = noise.exponential(self.processed_image)
             self.processed_image = result
@@ -330,6 +361,7 @@ class ImageProcessingApp:
 
     def noise_uniform(self):
         if self.processed_image:
+            self.push_undo()  # FIX: Tambah undo
             from modules import noise
             result = noise.uniform(self.processed_image)
             self.processed_image = result
@@ -339,6 +371,7 @@ class ImageProcessingApp:
 
     def noise_impulse(self):
         if self.processed_image:
+            self.push_undo()  # FIX: Tambah undo
             from modules import noise
             result = noise.impulse(self.processed_image)
             self.processed_image = result
@@ -347,8 +380,25 @@ class ImageProcessingApp:
             messagebox.showwarning("Warning", "Silakan buka gambar terlebih dahulu.")
 
     def create_canvas(self):
-        self.canvas = tk.Canvas(self.root, width=500, height=400, bg='gray')
-        self.canvas.pack(pady=20)
+        # Frame container dengan scrollbar
+        self.canvas_frame = tk.Frame(self.root)
+        self.canvas_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Scrollbars
+        self.h_scroll = tk.Scrollbar(self.canvas_frame, orient=tk.HORIZONTAL)
+        self.h_scroll.pack(side=tk.BOTTOM, fill=tk.X)
+        
+        self.v_scroll = tk.Scrollbar(self.canvas_frame, orient=tk.VERTICAL)
+        self.v_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # Canvas dengan scrollbar
+        self.canvas = tk.Canvas(self.canvas_frame, bg='#2d3748',
+                               xscrollcommand=self.h_scroll.set,
+                               yscrollcommand=self.v_scroll.set)
+        self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        self.h_scroll.config(command=self.canvas.xview)
+        self.v_scroll.config(command=self.canvas.yview)
 
     def open_image(self):
         file_path = filedialog.askopenfilename(
@@ -366,6 +416,9 @@ class ImageProcessingApp:
             self.processed_image = self.image.copy()
             self.image_path = file_path
             self.display_image(self.image)
+            # Reset undo/redo stacks when new image is opened
+            self.undo_stack.clear()
+            self.redo_stack.clear()
         except Exception as e:
             messagebox.showerror("Error", f"Gagal membuka gambar: {e}")
 
@@ -395,12 +448,28 @@ class ImageProcessingApp:
             messagebox.showwarning("Warning", "Tidak ada gambar untuk disimpan.")
 
     def display_image(self, img):
-        img_resized = img.copy()
-        img_resized.thumbnail((500, 400))
-        self.photo = ImageTk.PhotoImage(img_resized)
+        # Tampilkan gambar dengan ukuran asli
+        self.photo = ImageTk.PhotoImage(img)
+        
+        # Hapus konten lama
         self.canvas.delete("all")
-        self.canvas.create_image(250, 200, image=self.photo)
-
+        
+        # Dapatkan ukuran gambar
+        img_width, img_height = img.size
+        
+        # Update ukuran scrollregion canvas
+        self.canvas.config(scrollregion=(0, 0, img_width, img_height))
+        
+        # Tampilkan gambar di sudut kiri atas (0, 0)
+        # Lebih optimal karena:
+        # 1. Konsisten untuk semua ukuran gambar
+        # 2. Mudah untuk crop dan manipulasi koordinat
+        # 3. Standar dalam image processing
+        self.canvas.create_image(0, 0, image=self.photo, anchor=tk.NW)
+        
+        # Reset scroll ke kiri atas
+        self.canvas.xview_moveto(0)
+        self.canvas.yview_moveto(0)
 
     def negative_image(self):
         if self.processed_image:
@@ -535,18 +604,46 @@ class ImageProcessingApp:
             self.display_image(result)
         else:
             messagebox.showwarning("Warning", "Silakan buka gambar terlebih dahulu.")
+    
+    # FIX: UI Slider yang lebih baik dengan input exact
     def ask_slider_int(self, title, label, minval, maxval, default):
         win = tk.Toplevel(self.root)
         win.title(title)
-        tk.Label(win, text=label).pack(pady=5)
+        win.geometry("450x150")
+        
+        tk.Label(win, text=label, font=('Arial', 10)).pack(pady=10)
+        
+        # Frame untuk slider dan entry
+        frame = tk.Frame(win)
+        frame.pack(padx=20, pady=10, fill=tk.X)
+        
         val = tk.IntVar(value=default)
-        slider = tk.Scale(win, from_=minval, to=maxval, orient=tk.HORIZONTAL, variable=val)
-        slider.pack(padx=10, pady=10)
+        
+        # Entry untuk input exact
+        entry = tk.Entry(frame, textvariable=val, width=10, font=('Arial', 10))
+        entry.pack(side=tk.RIGHT, padx=5)
+        
+        # Slider yang lebih panjang
+        slider = tk.Scale(frame, from_=minval, to=maxval, orient=tk.HORIZONTAL, 
+                         variable=val, length=300)
+        slider.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        
         result = {'value': None}
+        
         def on_ok():
             result['value'] = val.get()
             win.destroy()
-        tk.Button(win, text="OK", command=on_ok).pack(pady=5)
+        
+        def on_cancel():
+            win.destroy()
+        
+        # Frame untuk tombol
+        btn_frame = tk.Frame(win)
+        btn_frame.pack(pady=10)
+        
+        tk.Button(btn_frame, text="OK", command=on_ok, width=10).pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_frame, text="Cancel", command=on_cancel, width=10).pack(side=tk.LEFT, padx=5)
+        
         win.grab_set()
         win.wait_window()
         return result['value']
@@ -554,15 +651,41 @@ class ImageProcessingApp:
     def ask_slider_float(self, title, label, minval, maxval, default):
         win = tk.Toplevel(self.root)
         win.title(title)
-        tk.Label(win, text=label).pack(pady=5)
+        win.geometry("450x150")
+        
+        tk.Label(win, text=label, font=('Arial', 10)).pack(pady=10)
+        
+        # Frame untuk slider dan entry
+        frame = tk.Frame(win)
+        frame.pack(padx=20, pady=10, fill=tk.X)
+        
         val = tk.DoubleVar(value=default)
-        slider = tk.Scale(win, from_=minval, to=maxval, orient=tk.HORIZONTAL, variable=val, resolution=0.01)
-        slider.pack(padx=10, pady=10)
+        
+        # Entry untuk input exact
+        entry = tk.Entry(frame, textvariable=val, width=10, font=('Arial', 10))
+        entry.pack(side=tk.RIGHT, padx=5)
+        
+        # Slider yang lebih panjang
+        slider = tk.Scale(frame, from_=minval, to=maxval, orient=tk.HORIZONTAL, 
+                         variable=val, resolution=0.01, length=300)
+        slider.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        
         result = {'value': None}
+        
         def on_ok():
             result['value'] = val.get()
             win.destroy()
-        tk.Button(win, text="OK", command=on_ok).pack(pady=5)
+        
+        def on_cancel():
+            win.destroy()
+        
+        # Frame untuk tombol
+        btn_frame = tk.Frame(win)
+        btn_frame.pack(pady=10)
+        
+        tk.Button(btn_frame, text="OK", command=on_ok, width=10).pack(side=tk.LEFT, padx=5)
+        tk.Button(btn_frame, text="Cancel", command=on_cancel, width=10).pack(side=tk.LEFT, padx=5)
+        
         win.grab_set()
         win.wait_window()
         return result['value']
@@ -588,7 +711,6 @@ class ImageProcessingApp:
                 self.result = self.var.get()
         d = OptionDialog(self.root, title)
         return d.result
-
 
 
 if __name__ == "__main__":
